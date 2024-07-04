@@ -352,15 +352,16 @@ putStoneAI :: State -> State
 putStoneAI s = putStone $ s {position = snd $ minMax s 1}
 
 minMax :: State -> Integer -> (Integer, Coord)
-minMax s 0 = bestMove s (zip moveValues goodMoves) where
-  moveValues = map (\pos -> evaluatePosition $ putStone s {position = pos}) goodMoves
-  goodMoves = filter (hasNeigh s) possibleMoves
-  possibleMoves = (allMoves \\ ostones s) \\ xstones s
+minMax s 0 = bestMove s (zip moveValues gM) where
+  moveValues = map (\pos -> evaluatePosition $ putStone s {position = pos}) gM
+  gM = goodMoves s
 
-minMax s n = bestMove s (zip moveValues goodMoves) where
-  moveValues = pMap (\pos -> fst $ minMax (putStone s {position = pos}) (n - 1)) goodMoves
-  goodMoves = filter (hasNeigh s) possibleMoves
-  possibleMoves = (allMoves \\ ostones s) \\ xstones s
+minMax s n = bestMove s (zip moveValues gM) where
+  moveValues = pMap (\pos -> fst $ minMax (putStone s {position = pos}) (n - 1)) gM
+  gM = goodMoves s
+
+goodMoves :: State -> [Coord]
+goodMoves s = filter (hasNeigh s) $ (allMoves \\ ostones s) \\ xstones s
 
 hasNeigh :: State -> Coord -> Bool
 hasNeigh s (C x y) =
